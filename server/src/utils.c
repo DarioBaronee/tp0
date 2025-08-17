@@ -4,27 +4,37 @@ t_log* logger;
 
 int iniciar_servidor(void)
 {
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
-
 	int socket_servidor;
-
 	struct addrinfo hints, *servinfo, *p;
 
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
+	memset(&hints, 0, sizeof(hints));	// Limpiamos la estructura hints
+	hints.ai_family = AF_INET;			// Usamos IPv4
+	hints.ai_socktype = SOCK_STREAM;	// Usamos TCP
+	hints.ai_flags = AI_PASSIVE;		// Usamos la dirección local
 
-	getaddrinfo(NULL, PUERTO, &hints, &servinfo);
+	getaddrinfo(NULL, PUERTO, &hints, &servinfo);	// Obtenemos la información del servidor
 
 	// Creamos el socket de escucha del servidor
+	socket_servidor = socket(servinfo->ai_family,
+						servinfo->ai_socktype,
+						servinfo->ai_protocol);
 
 	// Asociamos el socket a un puerto
-
+	if (bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+		log_error(logger, "Error al hacer bind al socket");
+		close(socket_servidor);
+		freeaddrinfo(servinfo);
+		return -1;
+	}
 	// Escuchamos las conexiones entrantes
+	if (listen(socket_servidor, SOMAXCONN) == -1) {
+		log_error(logger, "Error al escuchar en el socket");
+		close(socket_servidor);
+		freeaddrinfo(servinfo);
+		return -1;
+	}
 
-	freeaddrinfo(servinfo);
+	freeaddrinfo(servinfo);		// Liberamos la memoria utilizada por servinfo
 	log_trace(logger, "Listo para escuchar a mi cliente");
 
 	return socket_servidor;
@@ -32,11 +42,12 @@ int iniciar_servidor(void)
 
 int esperar_cliente(int socket_servidor)
 {
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
-
 	// Aceptamos un nuevo cliente
-	int socket_cliente;
+	int socket_cliente = accept(socket_servidor, NULL, NULL);
+	if (socket_cliente == -1) {
+		log_error(logger, "Error al aceptar el cliente");
+		return -1;
+	}
 	log_info(logger, "Se conecto un cliente!");
 
 	return socket_cliente;
