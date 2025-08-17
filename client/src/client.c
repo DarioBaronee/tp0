@@ -18,6 +18,7 @@ int main(void)
 
 	// Usando el logger creado previamente
 	// Escribi: "Hola! Soy un log"
+	log_info(logger, "Hola! Soy un log");
 
 
 	/* ---------------- ARCHIVOS DE CONFIGURACION ---------------- */
@@ -26,8 +27,12 @@ int main(void)
 
 	// Usando el config creado previamente, leemos los valores del config y los 
 	// dejamos en las variables 'ip', 'puerto' y 'valor'
+	ip = config_get_string_value(config, "IP");
+	puerto = config_get_string_value(config, "PUERTO");
+	valor = config_get_string_value(config, "CLAVE");
 
 	// Loggeamos el valor de config
+	log_info(logger, "El valor de config es: %s", valor);
 
 
 	/* ---------------- LEER DE CONSOLA ---------------- */
@@ -50,33 +55,49 @@ int main(void)
 
 	/*---------------------------------------------------PARTE 5-------------------------------------------------------------*/
 	// Proximamente
+	log_destroy(logger);
+	config_destroy(config);
 }
 
 t_log* iniciar_logger(void)
 {
-	t_log* nuevo_logger;
+	/*
+	Loguee en el archivo "tp0.log"
+    Muestre los logs por pantalla (y no solo los escriba en el archivo)
+    Muestre solo los logs a partir del nivel "info".
+	*/
+	t_log* nuevo_logger = log_create ("tp0.log", "TP0_LOGGER", true, LOG_LEVEL_INFO);
+	if(nuevo_logger == NULL) {
+		fprintf(stderr, "Error al crear el logger\n");
+		abort(); // Termina el programa si no se pudo crear el logger
+	}
 
 	return nuevo_logger;
 }
 
+
 t_config* iniciar_config(void)
 {
-	t_config* nuevo_config;
-
+	t_config* nuevo_config = config_create("cliente.config");
+	if(nuevo_config == NULL) {
+		fprintf(stderr, "No se pudo cargar el archivo de configuración cliente.config\n");
+		abort(); // Termina el programa si no se pudo cargar la configuración
+	}
 	return nuevo_config;
 }
 
 void leer_consola(t_log* logger)
 {
-	char* leido;
+	char* leido = NULL;
 
-	// La primera te la dejo de yapa
-	leido = readline("> ");
-
-	// El resto, las vamos leyendo y logueando hasta recibir un string vacío
-
-
-	// ¡No te olvides de liberar las lineas antes de regresar!
+	// Leemos y logueamos hasta recibir un string vacío
+	while ((leido = readline("> ")) != NULL && leido[0] != '\0') {
+		log_info(logger, "Leído de consola: %s", leido);
+		free(leido); // Liberamos la memoria de la línea leída
+	}
+	if (leido != NULL) {
+		free(leido); // Liberamos la memoria si la última línea fue vacía
+	}
 
 }
 
