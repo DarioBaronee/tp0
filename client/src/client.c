@@ -56,8 +56,6 @@ int main(void)
 
 	/*---------------------------------------------------PARTE 5-------------------------------------------------------------*/
 	// Proximamente
-	log_destroy(logger);
-	config_destroy(config);
 }
 
 t_log* iniciar_logger(void)
@@ -67,7 +65,7 @@ t_log* iniciar_logger(void)
     Muestre los logs por pantalla (y no solo los escriba en el archivo)
     Muestre solo los logs a partir del nivel "info".
 	*/
-	t_log* nuevo_logger = log_create ("tp0.log", "TP0_LOGGER", true, LOG_LEVEL_INFO);
+	t_log* nuevo_logger = log_create ("tp0.log", "LOGGER", true, LOG_LEVEL_INFO);
 	if(nuevo_logger == NULL) {
 		fprintf(stderr, "Error al crear el logger\n");
 		abort(); // Termina el programa si no se pudo crear el logger
@@ -106,17 +104,26 @@ void paquete(int conexion)
 {
 	// Ahora toca lo divertido!
 	char* leido;
-	t_paquete* paquete;
+	t_paquete* paquete = crear_paquete();
 
+	printf("Ingrese los valores que desea enviar al servidor. Presione Enter para finalizar:\n");
 	// Leemos y esta vez agregamos las lineas al paquete
-
-
-	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!
-	
+	while ((leido = readline("> ")) != NULL && leido[0] != '\0') {
+		agregar_a_paquete(paquete, leido, strlen(leido) + 1);
+		free(leido); // Liberamos la memoria de la línea leída
+	}
+	if (leido != NULL) {
+		free(leido); // Liberamos la memoria si la última línea fue vacía
+	}
+	enviar_paquete(paquete, conexion);
+	eliminar_paquete(paquete);
 }
 
 void terminar_programa(int conexion, t_log* logger, t_config* config)
 {
 	/* Y por ultimo, hay que liberar lo que utilizamos (conexion, log y config) 
 	  con las funciones de las commons y del TP mencionadas en el enunciado */
+	log_destroy(logger);
+	config_destroy(config);
+	close(conexion); // Cerramos la conexión al socket
 }
