@@ -13,7 +13,8 @@ int main(void)
 	t_config* config;
 
 	/* ---------------- LOGGING ---------------- */
-
+	//Iniciamos logger
+	printf("Iniciando logger...\n");
 	logger = iniciar_logger();
 
 	// Usando el logger creado previamente
@@ -22,7 +23,7 @@ int main(void)
 
 
 	/* ---------------- ARCHIVOS DE CONFIGURACION ---------------- */
-
+	printf("Iniciando configuración...\n");
 	config = iniciar_config();
 
 	// Usando el config creado previamente, leemos los valores del config y los 
@@ -44,15 +45,18 @@ int main(void)
 	// ADVERTENCIA: Antes de continuar, tenemos que asegurarnos que el servidor esté corriendo para poder conectarnos a él
 
 	// Creamos una conexión hacia el servidor
+	printf("Creando conexión hacia el servidor %s:%s...\n", ip, puerto);
 	conexion = crear_conexion(ip, puerto);
-
+	printf("Conexion establecida correctamente.\n");
 	// Enviamos al servidor el valor de CLAVE como mensaje
 	enviar_mensaje(valor, conexion);
 
 	// Armamos y enviamos el paquete
 	paquete(conexion);
 
+	printf("Paquete enviado correctamente.\n");
 	terminar_programa(conexion, logger, config);
+	printf("Programa terminado correctamente.\n");
 
 	/*---------------------------------------------------PARTE 5-------------------------------------------------------------*/
 	// Proximamente
@@ -89,6 +93,7 @@ void leer_consola(t_log* logger)
 {
 	char* leido = NULL;
 
+	printf("Ingrese líneas para loguear. Presione Enter para finalizar:\n");
 	// Leemos y logueamos hasta recibir un string vacío
 	while ((leido = readline("> ")) != NULL && leido[0] != '\0') {
 		log_info(logger, "Leído de consola: %s", leido);
